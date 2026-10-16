@@ -29,8 +29,8 @@ const char GPRS_PASS[]      = "";
 #define I2C_SDA_PIN         21      // RTC SDA
 #define I2C_SCL_PIN         22      // RTC SCL
 #define PIN_DS18B20         4       // Temperature (Yellow wire)
-#define PIN_JSN_TRIG        5       // Ultrasonic Trigger
-#define PIN_JSN_ECHO        18      // Ultrasonic Echo
+#define PIN_JSN_TRIG        18       // Ultrasonic Trigger
+#define PIN_JSN_ECHO        19      // Ultrasonic Echo
 #define PIN_ZMPT101B        35      // AC Voltage OUT (ADC1)
 #define PIN_ACS712          34      // Current OUT (ADC1)
 
@@ -49,14 +49,20 @@ const char MQTT_USER[]      = "esp32";
 const char MQTT_PASS[]      = "Dulina123";
 
 // --- Generator Identity ---
-#define GENERATOR_ID        2
+#define GENERATOR_ID        1
 #define STR_HELPER(x)       #x
 #define STR(x)              STR_HELPER(x)
 #define MQTT_CLIENT_ID      "ESP32_Generator_" STR(GENERATOR_ID)
 #define MQTT_TOPIC          "generator/" STR(GENERATOR_ID) "/readings"
 
-// --- Timing ---
+// --- Timing & Delays ---
 #define SERIAL_DEBUG_BAUD   115200
-#define PUBLISH_INTERVAL_MS 2000   // Telemetry interval (30 seconds)
+#define BOOT_WAIT_SECONDS   30      // Wait 30s before starting process (Bluetooth connect window)
+#define FUEL_SAMPLE_COUNT   5       // Take 5 to 6 readings and send the average
+#define PUBLISH_INTERVAL_MS 2000   // Telemetry interval (2 seconds)
+
+// --- Runtime Tracking Mode ---
+#define RUNTIME_COUNT_ALWAYS true   // true = increment runtime continuously while powered on
+#define RUNTIME_SAVE_INTERVAL_S 60  // Save runtime to flash every 60 seconds (avoids flash wear)
 
 #endif // CONFIG_H

@@ -47,6 +47,9 @@ void initWiFiCommunication() {
       SerialBT.printf("[NTP] Sri Lanka Time Synced: %04d-%02d-%02d %02d:%02d:%02d\n",
                       timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
                       timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+      // Synchronize hardware DS3231 RTC module with exact Sri Lanka time!
+      syncRtcWithTime(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
+                      timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
     }
   } else {
     SerialBT.println("\n[WIFI] Connection failed!");

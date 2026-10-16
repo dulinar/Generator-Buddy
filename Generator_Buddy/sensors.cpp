@@ -4,11 +4,10 @@
 #include <RTClib.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <time.h>
+#include <Preferences.h>
 
 static RTC_DS3231 rtc;
 static bool rtcFound = false;
-static bool rtcSyncedWithNtp = false;
 static DateTime compileTime;
 static unsigned long bootMillis = 0;
 
@@ -19,7 +18,9 @@ static float voltageFactor = VOLTAGE_CAL_FACTOR;
 static float fuelCalFactor = 1.0f;
 static float idleCurrentRMS = 0.0f;
 static unsigned long totalRuntimeSeconds = 0UL;
-static unsigned long lastRuntimeCheck = 0;
+static unsigned long lastRuntimeMillis = 0;
+static unsigned long lastSaveMillis = 0;
+static Preferences prefs;
 
 // Measure single distance ping in cm (temperature-compensated speed of sound)
 static float pingDistanceCm(float tempC) {
@@ -38,43 +39,32 @@ static float pingDistanceCm(float tempC) {
   return (duration * speedCmPerUs) / 2.0f;
 }
 
-// Read filtered median distance (5 samples for outlier rejection)
-static float readMedianDistance(float tempC) {
-  float samples[5];
-  int count = 0;
-
-  for (int i = 0; i < 5; i++) {
-    float d = pingDistanceCm(tempC);
-    if (d >= TANK_MIN_DIST_CM && d <= 450.0f) {
-      samples[count++] = d;
-    } else if (i == 1 && count == 0) {
-      return -1.0f; // Fast exit if sensor is disconnected
-    }
-    delay(50);
-  }
-
-  // Require at least 3 valid echoes to reject random noise
-  if (count < 3) return -1.0f;
-
-  for (int i = 1; i < count; i++) {
-    float key = samples[i];
-    int j = i - 1;
-    while (j >= 0 && samples[j] > key) {
-      samples[j + 1] = samples[j];
-      j--;
-    }
-    samples[j + 1] = key;
-  }
-
-  return samples[count / 2];
-}
-
 // Convert distance (cm) to fuel percentage (0.00 - 100.00)
 static float distanceToFuelPct(float distCm) {
   float pct = ((TANK_HEIGHT_CM - distCm) / (TANK_HEIGHT_CM - TANK_MIN_DIST_CM)) * 100.0f;
   if (pct < 0.0f) pct = 0.0f;
   if (pct > 100.0f) pct = 100.0f;
   return pct;
+}
+
+// Read 5 to 6 fuel readings and return the exact average percentage
+static float readAverageFuelPct(float tempC) {
+  float ambientT = (tempC > 0.0f) ? tempC : 28.0f;
+  float sum = 0.0f;
+  int validCount = 0;
+
+  for (int i = 0; i < FUEL_SAMPLE_COUNT; i++) {
+    float d = pingDistanceCm(ambientT);
+    if (d >= TANK_MIN_DIST_CM && d <= 450.0f) {
+      float pct = distanceToFuelPct(d * fuelCalFactor);
+      sum += pct;
+      validCount++;
+    }
+    delay(35);
+  }
+
+  if (validCount == 0) return 0.00f;
+  return (sum / validCount);
 }
 
 // Measure AC RMS voltage from analog pin (returns 0 if sensor is disconnected/floating)
@@ -92,14 +82,24 @@ static float measureAnalogRMS(int pin) {
 
   float mean = sum / samples;
 
-  // ZMPT101B and ACS712 have a steady DC midpoint bias (~1.5V - 2.6V).
-  // If pin is unconnected/floating, mean falls outside [1.2V, 2.7V].
-  if (mean < 1.2f || mean > 2.7f) {
+  // Reject completely disconnected/grounded/shorted pin
+  if (mean < 0.2f || mean > 3.1f) {
     return 0.0f;
   }
 
   float variance = (sumSq / samples) - (mean * mean);
   return (variance > 0.0f) ? sqrt(variance) : 0.0f;
+}
+
+// -------------------------------------------------------------
+// Synchronize hardware RTC module with Sri Lanka time
+// -------------------------------------------------------------
+void syncRtcWithTime(int year, int month, int day, int hour, int minute, int second) {
+  if (rtcFound && year >= 2026) {
+    rtc.adjust(DateTime(year, month, day, hour, minute, second));
+    SerialBT.printf("[RTC] Hardware DS3231 RTC synchronized with Sri Lanka time: %04d-%02d-%02d %02d:%02d:%02d\n",
+                    year, month, day, hour, minute, second);
+  }
 }
 
 // -------------------------------------------------------------
@@ -111,64 +111,54 @@ bool initSensors() {
   compileTime = DateTime(F(__DATE__), F(__TIME__));
   bootMillis = millis();
 
-  // 1. RTC DS3231
+  // Load saved runtime from ESP32 flash (survives reboot)
+  prefs.begin("genbuddy", false);
+  totalRuntimeSeconds = prefs.getULong("runtime", 0UL);
+  SerialBT.printf("[NVS] Loaded runtime from flash: %lu seconds\n", totalRuntimeSeconds);
+
+  // 1. RTC DS3231 - Primary Timestamp Source
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
   if (rtc.begin(&Wire)) {
     rtcFound = true;
     DateTime now = rtc.now();
-    if (rtc.lostPower() || now.unixtime() < compileTime.unixtime()) {
+    // If RTC has not been set (factory year < 2026) or lost battery power, set to PC compile time
+    if (rtc.lostPower() || now.year() < 2026) {
       rtc.adjust(compileTime);
       now = rtc.now();
+      SerialBT.printf("[RTC] RTC initialized to Sri Lanka compile time: %04d-%02d-%02d %02d:%02d:%02d\n",
+                      now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+    } else {
+      SerialBT.printf("[RTC] Time from RTC: %04d-%02d-%02d %02d:%02d:%02d\n",
+                      now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
     }
-    SerialBT.printf("[RTC] OK - Current Time: %04d-%02d-%02d %02d:%02d:%02d\n",
-                    now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
   } else {
     rtcFound = false;
-    SerialBT.println("[RTC] Not connected on I2C (will use Sri Lanka NTP / system time).");
+    SerialBT.println("[RTC] WARNING: DS3231 RTC not detected at 0x68 on I2C (GPIO 21/22).");
   }
 
   // 2. DS18B20 Temperature Sensor (GPIO 4)
+  pinMode(PIN_DS18B20, INPUT_PULLUP);
   tempSensor.begin();
-  float initTemp = 0.0f;
-  if (tempSensor.getDeviceCount() > 0) {
-    tempSensor.requestTemperatures();
-    float t = tempSensor.getTempCByIndex(0);
-    if (t != DEVICE_DISCONNECTED_C && t > -50.0f && t < 125.0f) {
-      initTemp = t;
-      SerialBT.printf("[DS18B20] OK - Temperature: %.1f C (GPIO %d)\n", initTemp, PIN_DS18B20);
-    } else {
-      SerialBT.printf("[DS18B20] Connected but invalid reading on GPIO %d -> 0.0 C\n", PIN_DS18B20);
-    }
+  tempSensor.requestTemperatures();
+  float initTemp = tempSensor.getTempCByIndex(0);
+  if (initTemp != DEVICE_DISCONNECTED_C && initTemp > -50.0f && initTemp < 125.0f && initTemp != 85.0f) {
+    SerialBT.printf("[DS18B20] OK - Temperature: %.1f C (GPIO %d)\n", initTemp, PIN_DS18B20);
   } else {
-    SerialBT.printf("[DS18B20] Not connected on GPIO %d -> 0.0 C\n", PIN_DS18B20);
+    initTemp = 0.0f;
+    SerialBT.printf("[DS18B20] Not detected on GPIO %d -> 0.0 C\n", PIN_DS18B20);
   }
 
-  // 3. JSN-SR04T Fuel Sensor Calibration (GPIO 5 / 18)
+  // 3. JSN-SR04T Fuel Sensor Calibration (TRIG GPIO 18 / ECHO GPIO 19)
   pinMode(PIN_JSN_TRIG, OUTPUT);
   pinMode(PIN_JSN_ECHO, INPUT_PULLDOWN);
   digitalWrite(PIN_JSN_TRIG, LOW);
-  SerialBT.println("[JSN-SR04T] Starting Ultrasonic Calibration...");
+  SerialBT.println("[JSN-SR04T] Starting Ultrasonic Calibration (Averaging Samples)...");
 
-  float distSum = 0;
-  int validPasses = 0;
-  for (int r = 1; r <= 3; r++) {
-    float d = readMedianDistance(initTemp);
-    if (d > 0) {
-      distSum += d;
-      validPasses++;
-      SerialBT.printf("  Pass %d/3: %.2f cm\n", r, d);
-    } else {
-      SerialBT.printf("  Pass %d/3: Sensor not connected or no echo\n", r);
-    }
-  }
-
-  if (validPasses > 0) {
-    float avgDist = distSum / validPasses;
-    float initFuel = distanceToFuelPct(avgDist * fuelCalFactor);
-    SerialBT.printf("[JSN-SR04T] Calibrated OK - Avg Dist: %.2f cm | Initial Fuel: %.2f\n",
-                    avgDist, initFuel);
+  float initFuel = readAverageFuelPct(initTemp);
+  if (initFuel > 0.0f) {
+    SerialBT.printf("[JSN-SR04T] Initial Fuel Average: %.2f\n", initFuel);
   } else {
-    SerialBT.println("[JSN-SR04T] Not connected -> Initial Fuel: 0.00");
+    SerialBT.println("[JSN-SR04T] Not connected or out of range -> Initial Fuel: 0.00");
   }
 
   // 4. ZMPT101B AC Voltage Auto-Calibration (GPIO 35)
@@ -178,13 +168,13 @@ bool initSensors() {
 
   float sensorRMS = measureAnalogRMS(PIN_ZMPT101B);
   SerialBT.printf("[ZMPT101B] Sensor RMS = %.4f V\n", sensorRMS);
-  if (sensorRMS >= 0.20f && sensorRMS <= 0.85f) {
+  if (sensorRMS >= 0.15f && sensorRMS <= 0.85f) {
     voltageFactor = REFERENCE_VOLTAGE / sensorRMS;
     SerialBT.printf("[ZMPT101B] Auto-Calibrated: Factor = %.2f (Ref %.1fV)\n",
                     voltageFactor, REFERENCE_VOLTAGE);
   } else {
     voltageFactor = VOLTAGE_CAL_FACTOR;
-    SerialBT.printf("[ZMPT101B] No AC voltage or sensor disconnected. Factor = %.2f\n", voltageFactor);
+    SerialBT.printf("[ZMPT101B] No AC voltage at boot. Using Factor = %.2f\n", voltageFactor);
   }
 
   // 5. ACS712 Current Sensor Baseline (GPIO 34)
@@ -192,7 +182,7 @@ bool initSensors() {
   SerialBT.printf("[ACS712] Baseline RMS on GPIO %d: %.4f V\n", PIN_ACS712, idleCurrentRMS);
 
   SerialBT.println("--- Sensor Initialization & Calibration Complete ---\n");
-  lastRuntimeCheck = millis() / 1000;
+  lastRuntimeMillis = millis();
   return rtcFound;
 }
 
@@ -200,18 +190,13 @@ bool initSensors() {
 // Read All Sensors
 // -------------------------------------------------------------
 void readSensors(GeneratorData &data) {
-  // 1. Timestamp (Sri Lanka Time UTC+5:30 via NTP, RTC, or Compile Time)
+  // 1. Timestamp (Always accurate Sri Lanka Time: from RTC, live NTP, or compile time)
   struct tm timeinfo;
   if (getLocalTime(&timeinfo, 10) && timeinfo.tm_year > 120) {
     snprintf(data.recorded_at, sizeof(data.recorded_at),
              "%04d-%02d-%02dT%02d:%02d:%02d",
              timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
              timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-    if (rtcFound && !rtcSyncedWithNtp) {
-      rtc.adjust(DateTime(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-                          timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec));
-      rtcSyncedWithNtp = true;
-    }
   } else if (rtcFound) {
     DateTime now = rtc.now();
     snprintf(data.recorded_at, sizeof(data.recorded_at),
@@ -226,45 +211,57 @@ void readSensors(GeneratorData &data) {
              now.hour(), now.minute(), now.second());
   }
 
-  // 2. Temperature from DS18B20 (GPIO 4) - 0.0 if disconnected
-  if (tempSensor.getDeviceCount() > 0) {
-    tempSensor.requestTemperatures();
-    float t = tempSensor.getTempCByIndex(0);
-    data.temperature = (t != DEVICE_DISCONNECTED_C && t > -50.0f && t < 125.0f) ? t : 0.0f;
-  } else {
-    data.temperature = 0.0f;
-  }
+  // 2. Temperature from DS18B20 (GPIO 4) - Direct read without getDeviceCount
+  tempSensor.requestTemperatures();
+  float t = tempSensor.getTempCByIndex(0);
+  data.temperature = (t != DEVICE_DISCONNECTED_C && t > -50.0f && t < 125.0f && t != 85.0f) ? t : 0.0f;
 
-  // 3. Fuel Level Percentage (0.00 - 100.00) - 0.00 if disconnected
-  float dist = readMedianDistance(data.temperature);
-  data.fuel_level = (dist > 0) ? distanceToFuelPct(dist * fuelCalFactor) : 0.00f;
+  // 3. Fuel Level Percentage - Average of 5 to 6 readings
+  data.fuel_level = readAverageFuelPct(data.temperature);
 
-  // 4. AC Voltage from ZMPT101B (GPIO 35) - 0.0 if disconnected or < 50V
+  // 4. AC Voltage from ZMPT101B (GPIO 35)
   float vRMS = measureAnalogRMS(PIN_ZMPT101B);
-  float v = (vRMS >= 0.15f) ? (vRMS * voltageFactor) : 0.0f;
-  data.voltage = (v < 50.0f) ? 0.0f : v;
+  float v = (vRMS > 0.02f) ? (vRMS * voltageFactor) : 0.0f;
+  data.voltage = (v < 15.0f) ? 0.0f : v;
 
-  // 5. Generator Status & Frequency (running if AC voltage is present, else offline)
-  bool acPresent = (data.voltage >= 100.0f);
-  strncpy(data.status, acPresent ? "running" : "offline", sizeof(data.status));
+  // 5. Generator Status & Frequency (running when AC voltage is present, else stopped)
+  bool acPresent = (data.voltage > 50.0f);
+  strncpy(data.status, acPresent ? "running" : "stopped", sizeof(data.status));
   data.frequency = acPresent ? 50.0f : 0.0f;
 
-  // 6. Output Current from ACS712 (GPIO 34) - 0.0 if disconnected or offline
+  // 6. Output Current from ACS712 (GPIO 34)
   if (acPresent) {
     float cRMS = measureAnalogRMS(PIN_ACS712) - idleCurrentRMS;
-    float c = (cRMS > 0.02f) ? (cRMS / CURRENT_SENSITIVITY) : 0.0f;
-    data.current = (c < 0.25f) ? 0.0f : c;
+    float c = (cRMS > 0.015f) ? (cRMS / CURRENT_SENSITIVITY) : 0.0f;
+    data.current = (c < 0.20f) ? 0.0f : c;
   } else {
     data.current = 0.0f;
   }
 
-  // 7. Runtime Tracking (starts at 0, accumulates seconds only while running)
-  unsigned long nowSec = millis() / 1000;
-  if (acPresent && lastRuntimeCheck > 0) {
-    totalRuntimeSeconds += (nowSec - lastRuntimeCheck);
+  // 7. Runtime Tracking (increments seconds accurately)
+  unsigned long nowMillis = millis();
+  if (lastRuntimeMillis == 0) {
+    lastRuntimeMillis = nowMillis;
   }
-  lastRuntimeCheck = nowSec;
+  unsigned long elapsedSec = (nowMillis - lastRuntimeMillis) / 1000;
+  if (elapsedSec > 0) {
+#if RUNTIME_COUNT_ALWAYS
+    totalRuntimeSeconds += elapsedSec;
+#else
+    if (acPresent) {
+      totalRuntimeSeconds += elapsedSec;
+    }
+#endif
+    lastRuntimeMillis += elapsedSec * 1000;
+  }
   data.runtime_seconds = totalRuntimeSeconds;
+
+  // Save runtime to flash periodically (every RUNTIME_SAVE_INTERVAL_S seconds)
+  if (nowMillis - lastSaveMillis >= (unsigned long)RUNTIME_SAVE_INTERVAL_S * 1000UL) {
+    prefs.putULong("runtime", totalRuntimeSeconds);
+    lastSaveMillis = nowMillis;
+    SerialBT.printf("[NVS] Runtime saved to flash: %lu seconds\n", totalRuntimeSeconds);
+  }
 
   // Bluetooth debug log
   SerialBT.printf("[SENSORS] Time: %s | Status: %s | Volt: %.1fV | Curr: %.2fA | Freq: %.1fHz | Temp: %.1fC | Fuel: %.2f | Runtime: %lus\n",

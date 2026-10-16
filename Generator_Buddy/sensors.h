@@ -17,5 +17,6 @@ struct GeneratorData {
 
 bool initSensors();
 void readSensors(GeneratorData &data);
+void syncRtcWithTime(int year, int month, int day, int hour, int minute, int second);
 
 #endif // SENSORS_H

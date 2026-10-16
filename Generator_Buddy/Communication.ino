@@ -12,10 +12,16 @@ static unsigned long lastPublishTime = 0;
 void setup() {
   Serial.begin(SERIAL_DEBUG_BAUD);
   SerialBT.begin(BT_DEVICE_NAME);
-  delay(1000);
+
+  // Wait 30 seconds for user to connect Bluetooth terminal
+  for (int i = BOOT_WAIT_SECONDS; i > 0; i--) {
+    Serial.printf("[BOOT] Starting in %d seconds (connect Bluetooth now)...\n", i);
+    SerialBT.printf("[BOOT] Starting in %d seconds (connect Bluetooth now)...\n", i);
+    delay(1000);
+  }
 
   SerialBT.println("\n==========================================");
-  SerialBT.println(" ESP32 Generator Monitor (Bluetooth Debug)");
+  SerialBT.println(" Generator Buddy Bluetooth Debugging)");
   SerialBT.println("==========================================");
 
   // Initialize sensors and network communication
