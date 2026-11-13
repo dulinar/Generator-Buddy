@@ -1,0 +1,27 @@
+{
+  "name": "generator-mqtt-mysql-sync",
+  "version": "1.0.0",
+  "description": "Node.js service that subscribes to Mosquitto MQTT and writes generator sensor readings into MySQL",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node test/readingsHandler.test.js"
+  },
+  "keywords": [
+    "mqtt",
+    "mosquitto",
+    "mysql",
+    "iot",
+    "esp32",
+    "generator",
+    "sensor"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "mqtt": "^5.10.3",
+    "mysql2": "^3.12.0"
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\application.properties||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:application.properties||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\readingsHandler.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\readingsHandler.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\mqttClient.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\mqttClient.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\config.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\generator-sync.service||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:generator-sync.service||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\Dockerfile||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Dockerfile||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\schema.sql||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:schema.sql||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\test\\readingsHandler.test.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:test\\readingsHandler.test.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\.env.example||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.env.example||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\db.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\db.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "application.properties",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\application.properties",
+              "RelativeDocumentMoniker": "application.properties",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\application.properties",
+              "RelativeToolTip": "application.properties",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAACwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-13T03:27:30.835Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "readingsHandler.js",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\readingsHandler.js",
+              "RelativeDocumentMoniker": "src\\readingsHandler.js",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\readingsHandler.js",
+              "RelativeToolTip": "src\\readingsHandler.js",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-08T15:40:54.497Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "config.js",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\config.js",
+              "RelativeDocumentMoniker": "src\\config.js",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\config.js",
+              "RelativeToolTip": "src\\config.js",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-08T15:40:33.277Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "generator-sync.service",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\generator-sync.service",
+              "RelativeDocumentMoniker": "generator-sync.service",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\generator-sync.service",
+              "RelativeToolTip": "generator-sync.service",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-08T15:40:07.2Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\Dockerfile",
+              "RelativeDocumentMoniker": "Dockerfile",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\Dockerfile",
+              "RelativeToolTip": "Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-07T16:29:05.653Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "docker-compose.yml",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\docker-compose.yml",
+              "RelativeDocumentMoniker": "docker-compose.yml",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\docker-compose.yml",
+              "RelativeToolTip": "docker-compose.yml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
+              "WhenOpened": "2026-09-07T16:28:43.518Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "mqttClient.js",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\mqttClient.js",
+              "RelativeDocumentMoniker": "src\\mqttClient.js",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\mqttClient.js",
+              "RelativeToolTip": "src\\mqttClient.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-06T18:17:16.802Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "README.md",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\README.md",
+              "RelativeDocumentMoniker": "README.md",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\README.md",
+              "RelativeToolTip": "README.md",
+              "ViewState": "AgIAAFoAAAAAAAAAAAAAAGoAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-09-06T18:13:28.775Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "readingsHandler.test.js",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\test\\readingsHandler.test.js",
+              "RelativeDocumentMoniker": "test\\readingsHandler.test.js",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\test\\readingsHandler.test.js",
+              "RelativeToolTip": "test\\readingsHandler.test.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-06T18:16:58.615Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": ".env.example",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\.env.example",
+              "RelativeDocumentMoniker": ".env.example",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\.env.example",
+              "RelativeToolTip": ".env.example",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-09-06T18:16:24.71Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "schema.sql",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\schema.sql",
+              "RelativeDocumentMoniker": "schema.sql",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\schema.sql",
+              "RelativeToolTip": "schema.sql",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-09-06T18:13:08.189Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "db.js",
+              "DocumentMoniker": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\db.js",
+              "RelativeDocumentMoniker": "src\\db.js",
+              "ToolTip": "D:\\OneDrive - Sri Lanka Institute of Information Technology\\Y3\\S2\\NTP\\Project Codes\\Sync\\src\\db.js",
+              "RelativeToolTip": "src\\db.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-06T18:12:26.13Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  generator-sync-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: generator-sync-service:latest
+    container_name: generator_sync_service
+    restart: unless-stopped
+    
+    # On Ubuntu / Linux: 'network_mode: host' gives bare-metal network performance
+    # and allows connecting directly to Mosquitto (1883) and MySQL (3306) on localhost.
+    network_mode: "host"
+
+    # Mount local application.properties so you can modify settings without rebuilding
+    volumes:
+      - ./application.properties:/app/application.properties:ro
+
+    environment:
+      - NODE_ENV=production
+
+    # Resource constraints tailored for lightweight IoT sync services on ARM64
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+
+    # Log rotation to protect disk space on Ubuntu servers
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
