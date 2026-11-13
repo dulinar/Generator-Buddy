@@ -78,18 +78,18 @@ void maintainConnection() {
 bool publishTelemetry(const GeneratorData &data) {
   if (!mqttClient.connected()) return false;
 
-  JsonDocument doc;
-  doc["recorded_at"]     = data.recorded_at;
-  doc["status"]          = data.status;
-  doc["voltage"]         = serialized(String(data.voltage, 1));
-  doc["current"]         = serialized(String(data.current, 1));
-  doc["frequency"]       = serialized(String(data.frequency, 1));
-  doc["temperature"]     = serialized(String(data.temperature, 1));
-  doc["fuel_level"]      = serialized(String(data.fuel_level, 2));
-  doc["runtime_seconds"] = data.runtime_seconds;
-
   char payload[384];
-  serializeJson(doc, payload, sizeof(payload));
+  snprintf(payload, sizeof(payload),
+    "{\"recorded_at\":\"%s\",\"status\":\"%s\",\"voltage\":%.1f,\"current\":%.1f,\"frequency\":%.1f,\"temperature\":%.1f,\"fuel_level\":%.1f,\"runtime_seconds\":%lu}",
+    data.recorded_at,
+    data.status,
+    data.voltage,
+    data.current,
+    data.frequency,
+    data.temperature,
+    data.fuel_level,
+    (unsigned long)data.runtime_seconds
+  );
 
   SerialBT.print("[GSM-MQTT] Publish: ");
   SerialBT.println(payload);
