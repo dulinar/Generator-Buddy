@@ -6,15 +6,14 @@
 
 extern BluetoothSerial SerialBT;
 
+// Arduino IDE: classic ESP32, 4 MB flash, Huge APP partition.
 // --- Communication Mode ---
+#ifndef USE_WIFI_MODE
 #define USE_WIFI_MODE       true    // true = WiFi, false = SIM800L GSM
+#endif
 #define BT_DEVICE_NAME      "Generator_Buddy"
 
-// --- WiFi Settings ---
-const char WIFI_SSID[]      = "REDMI 15C";
-const char WIFI_PASS[]      = "dulina123";
-// const char WIFI_SSID[]      = "Byte Me";
-// const char WIFI_PASS[]      = "Duli@2003";
+#include "secrets.h"
 
 // --- SIM800L Pins & APN ---
 #define MODEM_RX_PIN        17      // ESP32 RX2 <- SIM800L TXD
@@ -37,16 +36,12 @@ const char GPRS_PASS[]      = "";
 // --- Sensor Calibration & Limits ---
 #define TANK_HEIGHT_CM      100.0f  // Empty tank distance in cm
 #define TANK_MIN_DIST_CM    22.0f   // Full tank distance (sensor blind zone 22cm)
-#define FUEL_REF_DIST_CM    50.0f   // Calibration reference distance in cm
-#define REFERENCE_VOLTAGE   241.0f  // Known AC voltage for ZMPT101B auto-calibration
-#define VOLTAGE_CAL_FACTOR  450.0f  // Default ZMPT101B factor when offline at boot
+#define VOLTAGE_CAL_FACTOR  450.0f  // Calibrate against a verified meter; never auto-calibrate at boot
 #define CURRENT_SENSITIVITY 0.066f  // ACS712-30A sensitivity (66 mV/A)
 
 // --- MQTT Broker Settings ---
 const char MQTT_BROKER[]    = "141.148.197.200";
 const int  MQTT_PORT        = 1884;
-const char MQTT_USER[]      = "esp32";
-const char MQTT_PASS[]      = "Dulina123";
 
 // --- Generator Identity ---
 #define GENERATOR_ID        1
@@ -57,12 +52,17 @@ const char MQTT_PASS[]      = "Dulina123";
 
 // --- Timing & Delays ---
 #define SERIAL_DEBUG_BAUD   115200
-#define BOOT_WAIT_SECONDS   30      // Wait 30s before starting process (Bluetooth connect window)
-#define FUEL_SAMPLE_COUNT   5       // Take 5 to 6 readings and send the average
+#define BOOT_WAIT_SECONDS   2      // Short startup; Bluetooth remains available
+#define FUEL_SAMPLE_COUNT   5       // Median filter across five pings
 #define PUBLISH_INTERVAL_MS 2000   // Telemetry interval (2 seconds)
 
 // --- Runtime Tracking Mode ---
-#define RUNTIME_COUNT_ALWAYS true   // true = increment runtime continuously while powered on
+#define RUNTIME_COUNT_ALWAYS false   // true = increment runtime continuously while powered on
 #define RUNTIME_SAVE_INTERVAL_S 60  // Save runtime to flash every 60 seconds (avoids flash wear)
+
+// SSD1306 128x32 shares the RTC I2C bus.
+#define OLED_I2C_ADDRESS 0x3C
+#define NETWORK_RETRY_MS 15000UL
+#define MQTT_RETRY_MS 5000UL
 
 #endif // CONFIG_H

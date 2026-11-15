@@ -1,106 +1,80 @@
 #include "config.h"
-
 #if USE_WIFI_MODE
-
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
 #include <time.h>
 #include "wifi_comm.h"
+#include "display.h"
 
 static WiFiClient wifiClient;
-static PubSubClient wifiMqttClient(wifiClient);
-static unsigned long lastWiFiMqttReconnect = 0;
-
-static bool connectWiFiMqtt() {
-  SerialBT.print("[WIFI-MQTT] Connecting to broker... ");
-  bool ok = (strlen(MQTT_USER) > 0)
-    ? wifiMqttClient.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASS)
-    : wifiMqttClient.connect(MQTT_CLIENT_ID);
-
-  SerialBT.println(ok ? "Connected!" : "Failed!");
-  return ok;
-}
+static PubSubClient mqtt(wifiClient);
+static uint32_t lastNetworkAttempt = 0, lastMqttAttempt = 0, lastRtcSync = 0;
+static bool ntpStarted = false, rtcSynced = false, triedMqtt = false;
+static bool networkWasConnected = false;
 
 void initWiFiCommunication() {
-  SerialBT.print("[WIFI] Connecting to ");
-  SerialBT.println(WIFI_SSID);
-
+  showDisplayStage("Starting Wi-Fi", "Connecting...");
+  setDisplayConnection(ConnectionState::Connecting);
   WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 25) {
-    delay(500);
-    SerialBT.print(".");
-    attempts++;
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    SerialBT.print("\n[WIFI] Connected! IP: ");
-    SerialBT.println(WiFi.localIP());
-
-    // Sync time with NTP for Sri Lanka (UTC+5:30 = 19800 seconds)
-    configTime(19800, 0, "pool.ntp.org", "time.google.com");
-    struct tm timeinfo;
-    if (getLocalTime(&timeinfo, 3000)) {
-      SerialBT.printf("[NTP] Sri Lanka Time Synced: %04d-%02d-%02d %02d:%02d:%02d\n",
-                      timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-                      timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-      // Synchronize hardware DS3231 RTC module with exact Sri Lanka time!
-      syncRtcWithTime(timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-                      timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-    }
-  } else {
-    SerialBT.println("\n[WIFI] Connection failed!");
-  }
-
-  wifiMqttClient.setServer(MQTT_BROKER, MQTT_PORT);
-  wifiMqttClient.setBufferSize(512);
-
-  if (WiFi.status() == WL_CONNECTED) {
-    connectWiFiMqtt();
-  }
+  lastNetworkAttempt = millis();
+  mqtt.setServer(MQTT_BROKER, MQTT_PORT);
+  mqtt.setBufferSize(768);
+  mqtt.setSocketTimeout(2);
+  wifiClient.setConnectionTimeout(2000);
 }
 
 void maintainWiFiConnection() {
+  uint32_t now = millis();
   if (WiFi.status() != WL_CONNECTED) {
-    WiFi.disconnect();
-    WiFi.reconnect();
+    if (networkWasConnected) {
+      setDisplayConnection(ConnectionState::NetworkFailed);
+      networkWasConnected = false;
+      wifiClient.stop();
+    }
+    if (now - lastNetworkAttempt >= NETWORK_RETRY_MS) {
+      setDisplayConnection(ConnectionState::NetworkFailed);
+      SerialBT.println("[WiFi] Connection unavailable; retrying");
+      // Let each asynchronous association attempt finish before trying again.
+      WiFi.reconnect();
+      lastNetworkAttempt = now;
+    }
     return;
   }
-
-  if (!wifiMqttClient.connected()) {
-    unsigned long now = millis();
-    if (now - lastWiFiMqttReconnect >= 5000) {
-      lastWiFiMqttReconnect = now;
-      connectWiFiMqtt();
+  networkWasConnected = true;
+  if (!ntpStarted) {
+    configTime(19800, 0, "pool.ntp.org", "time.google.com");
+    ntpStarted = true;
+  }
+  struct tm ti;
+  bool timeReady = getLocalTime(&ti, 0);
+  if (timeReady && (!rtcSynced || now - lastRtcSync >= 3600000UL)) {
+    syncRtcWithTime(ti.tm_year + 1900, ti.tm_mon + 1, ti.tm_mday,
+                    ti.tm_hour, ti.tm_min, ti.tm_sec);
+    lastRtcSync = now;
+    rtcSynced = true;
+  }
+  if (!mqtt.connected()) {
+    setDisplayConnection(ConnectionState::BrokerFailed);
+    if (!triedMqtt || now - lastMqttAttempt >= MQTT_RETRY_MS) {
+      triedMqtt = true;
+      refreshDisplay();
+      bool ok = strlen(MQTT_USER) ? mqtt.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASS)
+                                  : mqtt.connect(MQTT_CLIENT_ID);
+      lastMqttAttempt = millis();
+      SerialBT.println(ok ? "[MQTT] Connected" : "[MQTT] Connection failed; retry scheduled");
+      setDisplayConnection(ok ? ConnectionState::Online : ConnectionState::BrokerFailed);
     }
   } else {
-    wifiMqttClient.loop();
+    mqtt.loop();
+    setDisplayConnection(mqtt.connected() ? ConnectionState::Online : ConnectionState::BrokerFailed);
   }
 }
 
 bool publishWiFiTelemetry(const GeneratorData &data) {
-  if (!wifiMqttClient.connected()) return false;
-
-  char payload[384];
-  snprintf(payload, sizeof(payload),
-    "{\"recorded_at\":\"%s\",\"status\":\"%s\",\"voltage\":%.1f,\"current\":%.1f,\"frequency\":%.1f,\"temperature\":%.1f,\"fuel_level\":%.1f,\"runtime_seconds\":%lu}",
-    data.recorded_at,
-    data.status,
-    data.voltage,
-    data.current,
-    data.frequency,
-    data.temperature,
-    data.fuel_level,
-    (unsigned long)data.runtime_seconds
-  );
-
-  SerialBT.print("[WIFI-MQTT] Publish: ");
-  SerialBT.println(payload);
-
-  return wifiMqttClient.publish(MQTT_TOPIC, payload);
+  if (!mqtt.connected()) return false;
+  char payload[640];
+  return formatTelemetry(data, payload, sizeof(payload)) && mqtt.publish(MQTT_TOPIC, payload);
 }
-
-#endif // USE_WIFI_MODE
+#endif
